@@ -77,7 +77,7 @@ END_EVENT_TABLE()
 /************ Constructor / Destructor **************/
 /****************************************************/
 
-long GetSpeedFromString(wxString label){
+static long GetSpeedFromString(wxString label){
 	long temp;
 	label.Replace(_("kB/s"),wxT(""),TRUE);
 	label.Trim(FALSE);
@@ -148,7 +148,8 @@ void CMuleTrayIcon::ServerConnection(wxCommandEvent& WXUNUSED(event))
 
 void CMuleTrayIcon::ShowHide(wxCommandEvent& WXUNUSED(event))
 {
-	theApp->amuledlg->DoIconize(theApp->amuledlg->IsShown());
+	theApp->amuledlg->Iconize(theApp->amuledlg->IsShown());
+	theApp->amuledlg->Show(!theApp->amuledlg->IsShown());
 }
 
 
@@ -521,6 +522,7 @@ wxMenu* CMuleTrayIcon::CreatePopupMenu()
 
 void CMuleTrayIcon::SwitchShow(wxTaskBarIconEvent&)
 {
-	theApp->amuledlg->DoIconize(theApp->amuledlg->IsShown());
+	theApp->amuledlg->Iconize(theApp->amuledlg->IsShown());
+	theApp->amuledlg->Show(!theApp->amuledlg->IsShown());
 }
 // File_checked_for_headers

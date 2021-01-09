@@ -63,7 +63,7 @@ const char s_deviceList[] = "deviceList";
 /**
  * Case insensitive std::string comparison
  */
-bool stdStringIsEqualCI(const std::string &s1, const std::string &s2)
+static bool stdStringIsEqualCI(const std::string &s1, const std::string &s2)
 {
 	std::string ns1(s1);
 	std::string ns2(s2);
@@ -436,7 +436,7 @@ m_SCPDURL    (IXML::Element::GetChildValueByTag(service, "SCPDURL")),
 m_controlURL (IXML::Element::GetChildValueByTag(service, "controlURL")),
 m_eventSubURL(IXML::Element::GetChildValueByTag(service, "eventSubURL")),
 m_timeout(1801),
-m_SCPD(NULL)
+m_SCPD(nullptr)
 {
 	std::ostringstream msg;
 	int errcode;
@@ -552,7 +552,7 @@ bool CUPnPService::Execute(
 	const std::vector<CUPnPArgumentValue> &ArgValue) const
 {
 	std::ostringstream msg;
-	if (m_SCPD.get() == NULL) {
+	if (m_SCPD.get() == nullptr) {
 		msg << "Service without SCPD Document, cannot execute action '" << ActionName <<
 			"' for service '" << GetServiceType() << "'.";
 		AddDebugLogLineN(logUPnP, msg);
@@ -824,13 +824,17 @@ m_WanService(NULL)
 	// Null string at first
 	std::ostringstream msg;
 
+	// Declare those here to avoid 
+	// "jump to label ‘error’ [-fpermissive] crosses initialization
+	// of ‘char* ipAddress’"
+	unsigned short port;
+	char *ipAddress;
+
 	// Start UPnP
 	int ret;
-	char *ipAddress = NULL;
-	unsigned short port = 0;
-	ret = UpnpInit(ipAddress, udpPort);
+	ret = UpnpInit2(0, udpPort);
 	if (ret != UPNP_E_SUCCESS) {
-		msg << "error(UpnpInit): Error code ";
+		msg << "error(UpnpInit2): Error code ";
 		goto error;
 	}
 	port = UpnpGetServerPort();

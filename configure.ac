@@ -54,11 +54,9 @@ MULE_RESTORE([BUILD_CFLAGS])
 AC_PROG_AWK
 AC_PROG_EGREP
 AC_PROG_MAKE_SET
-AC_PROG_LEX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_SED
-AC_PROG_YACC
 
 dnl Find the right ranlib, even when cross-compiling
 dnl And for some other tools for cross compilation
@@ -147,14 +145,6 @@ MULE_IF_ENABLED([webserver],
 		])
 	])
 AC_SUBST([AMULEWEB_DEFS])dnl
-
-
-# Check for perl File::Copy
-AC_MSG_CHECKING([for File::Copy])
-AS_IF([perl -e "require File::Copy" 2>/dev/null], [AC_MSG_RESULT([ok])],
-	[MULE_WARNING(
-		[File::Copy perl module is required by the mldonkey_importer script.
-		If you want to use this script please install File::Copy from CPAN.])])
 
 
 # Check for GeoIP (required for IP2Country capability)
@@ -261,7 +251,6 @@ MULE_IF_ENABLED_ANY([monolithic, amule-daemon, amule-gui, amulecmd, webserver], 
 ])
 
 # Ok, we have all needed libs, now checking for other stuff
-AS_IF([test "$LEX" = "flex"], [MULE_CHECK_FLEX_EXTENDED], [HAVE_FLEX_EXTENDED=no])
 
 
 # Checks for header files.
@@ -332,6 +321,11 @@ dnl Sets gettext version.
 dnl AM_GNU_GETTEXT_VERSION *must not* be moved away from configure.ac!
 AM_GNU_GETTEXT_VERSION(0.11.5)
 MULE_CHECK_NLS
+AS_IF([test x$USE_INCLUDED_LIBINTL = xyes], [AC_CONFIG_COMMANDS([intl], [[
+	test -d intl || mkdir intl
+	test -f intl/plural.c || cp "$srcdir"/intl/plural.c intl/
+	touch intl/plural.c
+]])])
 AC_LANG_PUSH([C++])
 
 
@@ -454,7 +448,6 @@ AM_CONDITIONAL(SYS_WIN32, test x$SYS = xwin32)
 AM_CONDITIONAL(NEED_RC, test x$SYS = xwin32 -a "$RC" != ":" -a x$WX_PORT = xmsw)
 AM_CONDITIONAL(NEED_CORESERVICES, test x$SYS = xdarwin)
 AM_CONDITIONAL(COMPILE_NLS, test x$USE_NLS = xyes)
-AM_CONDITIONAL(GENERATE_FLEX_HEADER, test x$HAVE_FLEX_EXTENDED = xyes)
 AM_CONDITIONAL(INSTALL_SKINS, test MULE_IS_ENABLED_ANY([monolithic, amule-gui]))
 AM_CONDITIONAL(PLASMAMULE, test MULE_IS_ENABLED([plasmamule]))
 

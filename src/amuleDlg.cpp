@@ -38,6 +38,7 @@
 #include <wx/zipstrm.h>
 #include <wx/sysopt.h>
 #include <wx/wupdlock.h>	// Needed for wxWindowUpdateLocker
+#include <wx/utils.h>		// Needed for wxFindWindowAtPoint
 
 #include <common/EventIDs.h>
 
@@ -301,7 +302,7 @@ m_clientSkinNames(CLIENT_SKIN_SIZE)
 	Show(true);
 	// Must we start minimized?
 	if (thePrefs::GetStartMinimized()) {
-		DoIconize(true);
+		Iconize(true);
 	}
 
 	// Set shortcut keys
@@ -503,7 +504,7 @@ void CamuleDlg::OnAboutButton(wxCommandEvent& WXUNUSED(ev))
 		_("Forum: http://forum.amule.org \n") <<
 		_("FAQ: http://wiki.amule.org \n\n") <<
 		_("Contact: admin@amule.org (administrative issues) \n") <<
-		_("Copyright (c) 2003-2011 aMule Team \n\n") <<
+		_("Copyright (c) 2003-2019 aMule Team \n\n") <<
 		_("Part of aMule is based on \n") <<
 		_("Kademlia: Peer-to-peer routing based on the XOR metric.\n") <<
                 _(" Copyright (c) 2002-2011 Petar Maymounkov ( petar@post.harvard.edu )\n") <<
@@ -1038,43 +1039,26 @@ bool CamuleDlg::SaveGUIPrefs()
 }
 
 
-void CamuleDlg::DoIconize(bool iconize)
-{
-	if (m_wndTaskbarNotifier && thePrefs::DoMinToTray()) {
-		if (iconize) {
-			// Skip() will do it.
-			//Iconize(true);
-			if (SafeState()) {
-				Show(false);
-			}
-		} else {
-			Show(true);
-			Raise();
-		}
-	} else {
-		// Will be done by Skip();
-		//Iconize(iconize);
-	}
-}
-
 void CamuleDlg::OnMinimize(wxIconizeEvent& evt)
 {
 // Evil Hack: check if the mouse is inside the window
 #ifndef __WINDOWS__
-	if (GetScreenRect().Contains(wxGetMousePosition()))
+	if (wxFindWindowAtPoint(wxGetMousePosition()))
 #endif
 	{
 		if (m_prefsDialog && m_prefsDialog->IsShown()) {
 			// Veto.
 		} else {
-			if (m_wndTaskbarNotifier) {
+			if (m_wndTaskbarNotifier && thePrefs::DoMinToTray()) {
 #if wxCHECK_VERSION(2, 9, 0)
-				DoIconize(evt.IsIconized());
+				Show(!evt.IsIconized());
 #else
-				DoIconize(evt.Iconized());
+				Show(!evt.Iconized());
 #endif
 			}
-			evt.Skip();
+			else {
+				evt.Skip();
+			}
 		}
 	}
 }
@@ -1183,22 +1167,6 @@ void CamuleDlg::LaunchUrl( const wxString& url )
 	// Unable to execute browser. But this error message doesn't make sense,
 	// cosidering that you _can't_ set the browser executable path... =/
 	wxLogError(wxT("Unable to launch browser. Please set correct browser executable path in Preferences."));
-}
-
-
-wxString CamuleDlg::GenWebSearchUrl(const wxString &filename, WebSearch wsProvider )
-{
-	wxString URL;
-	switch (wsProvider)  {
-		case WS_FILEHASH:
-			URL = wxT("http://www.filehash.com/search.html?pattern=FILENAME&submit=Find");
-			break;
-		default:
-			wxFAIL;
-	}
-	URL.Replace(wxT("FILENAME"), filename);
-
-	return URL;
 }
 
 

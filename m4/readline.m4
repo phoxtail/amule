@@ -36,27 +36,37 @@ AC_DEFUN([VL_LIB_READLINE], [
     if test -z "$vl_cv_lib_readline"; then
       vl_cv_lib_readline="no"
       LIBS="$ORIG_LIBS"
-      READLINE_LIBS=""
-    else
-      READLINE_LIBS="$vl_cv_lib_readline"
     fi
   ])
 
   if test "$vl_cv_lib_readline" != "no"; then
-    AC_DEFINE(HAVE_LIBREADLINE, 1,
-              [Define if you have a readline compatible library])
-    AC_CHECK_HEADERS(readline.h readline/readline.h)
+    have_readline_headers=no
+    AC_CHECK_HEADERS([readline/readline.h readline.h], [have_readline_headers=yes ; break])
+    if test "$have_readline_headers" = "yes"; then
+      READLINE_LIBS="$vl_cv_lib_readline"
+      AC_DEFINE(HAVE_LIBREADLINE, 1,
+                [Define if you have a readline compatible library])
+    else
+      READLINE_LIBS=
+      vl_cv_lib_readline=no
+    fi
     AC_CACHE_CHECK([whether readline supports history],
                    vl_cv_lib_readline_history, [
       vl_cv_lib_readline_history="no"
       AC_TRY_LINK_FUNC(add_history, vl_cv_lib_readline_history="yes")
     ])
     if test "$vl_cv_lib_readline_history" = "yes"; then
-      AC_DEFINE(HAVE_READLINE_HISTORY, 1,
-                [Define if your readline library has \`add_history'])
-      AC_CHECK_HEADERS(history.h readline/history.h)
+      have_readline_history_headers=no
+      AC_CHECK_HEADERS([readline/history.h history.h], [have_readline_history_headers=yes ; break])
+      if test "$have_readline_history_headers" = "yes"; then
+        AC_DEFINE(HAVE_READLINE_HISTORY, 1,
+                  [Define if your readline library has \`add_history'])
+      else
+        vl_cv_lib_readline_history=no
+      fi
     fi
+  else
+    READLINE_LIBS=""
   fi
   AC_SUBST(READLINE_LIBS)
-  LIBS="$ORIG_LIBS"
 ])dnl

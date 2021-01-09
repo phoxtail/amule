@@ -144,7 +144,7 @@ END_EVENT_TABLE()
  * have no side-effects other than enabling/disabling other
  * widgets in the preferences dialogs.
  */
-void SendCheckBoxEvent(wxWindow* parent, int id)
+static void SendCheckBoxEvent(wxWindow* parent, int id)
 {
 	wxCheckBox* widget = CastByID(id, parent, wxCheckBox);
 	wxCHECK_RET(widget, wxT("Invalid widget in CreateEvent"));
@@ -924,6 +924,10 @@ void PrefsUnifiedDlg::OnCheckBoxChange(wxCommandEvent& event)
 				theApp->amuledlg->RemoveSystray();
 			}
 			thePrefs::SetUseTrayIcon(value);
+			break;
+
+		case IDC_NOTIF:
+			FindWindow(IDC_NOTIF)->Enable(value);
 			break;
 
 		case ID_PROXY_AUTO_SERVER_CONNECT_WITHOUT_PROXY:

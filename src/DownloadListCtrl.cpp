@@ -371,7 +371,7 @@ uint8 CDownloadListCtrl::GetCategory() const
  * @param list A pointer to the list to gather items from.
  * @return A list containing the selected items.
  */
-ItemList GetSelectedItems( CDownloadListCtrl* list)
+static ItemList GetSelectedItems( CDownloadListCtrl* list)
 {
 	ItemList results;
 
@@ -1012,8 +1012,10 @@ void CDownloadListCtrl::DrawFileItem( wxDC* dc, int nColumn, const wxRect& rect,
 					uint16	hashingProgress = file->GetHashingProgress();
 					double	percent = hashingProgress == 0 ? file->GetPercentCompleted()
 										: 100.0 * hashingProgress * PARTSIZE / file->GetFileSize();
-					if (percent > 100.0) {
+					if (file->IsCompleted()) {
 						percent = 100.0;
+					} else if (percent > 99.9) {
+						percent = 99.9;
 					}
 					wxString buffer = CFormat(wxT("%.1f%%")) % percent;
 					int middlex = (2*rect.GetX() + rect.GetWidth()) >> 1;
